@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TOPMAP — Discover Anywhere</title>
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #080d16;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 22px;
+  border-bottom: 1px solid #202b3c;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.logo span { color: #64aaff; }
+
+main {
+  max-width: 1100px;
+  margin: auto;
+  padding: 30px 16px;
+}
+
+h1 { font-size: 36px; }
+
+.subtitle { color: #9aa9bd; }
+
+.search {
+  display: flex;
+  gap: 9px;
+  margin: 24px 0 18px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 15px;
+  background: #131e2d;
+  border: 1px solid #293b52;
+  border-radius: 10px;
+  color: white;
+}
+
+button {
+  padding: 13px 17px;
+  border: none;
+  border-radius: 10px;
+  background: #3988ff;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 18px;
+}
+
+.category {
+  background: #172438;
+  color: #d6e5ff;
+  border-radius: 30px;
+}
+
+.category.active {
+  background: #3988ff;
+}
+
+#map {
+  width: 100%;
+  height: 450px;
+  border-radius: 14px;
+  border: 1px solid #293b52;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #8291a6;
+}
+
+@media(max-width:500px) {
+  h1 { font-size: 29px; }
+  #map { height: 400px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">TOP<span>MAP</span></div>
+  <div>🌍 Explore</div>
+</header>
+
+<main>
+
+<h1>Discover your world.</h1>
+
+<p class="subtitle">
+Find places. Explore experiences. Discover more.
+</p>
+
+<div class="search">
+  <input id="search"
+  placeholder="Search gyms, cafes, parks...">
+  <button onclick="searchPlaces()">Search</button>
+</div>
+
+<div class="categories">
+  <button class="category active"
+  onclick="filterPlaces('All',this)">All</button>
+
+  <button class="category"
+  onclick="filterPlaces('Gym',this)">Gyms</button>
+
+  <button class="category"
+  onclick="filterPlaces('Cafe',this)">Cafes</button>
+
+  <button class="category"
+  onclick="filterPlaces('Park',this)">Parks</button>
+</div>
+
+<div id="map"></div>
+
+<p class="subtitle" id="status">
+Explore sample locations around the world.
+</p>
+
+</main>
+
+<footer>
+TOPMAP © 2026 · Discover Anywhere.
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const map = L.map('map').setView([20,0],2);
+
+L.tileLayer(
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+maxZoom:19,
+attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+const places = [
+{name:"Sample Gym Kolkata",type:"Gym",lat:22.57,lng:88.36},
+{name:"Sample Cafe New York",type:"Cafe",lat:40.71,lng:-74.00},
+{name:"Sample Park London",type:"Park",lat:51.50,lng:-0.12},
+{name:"Sample Gym Tokyo",type:"Gym",lat:35.68,lng:139.69},
+{name:"Sample Cafe Paris",type:"Cafe",lat:48.85,lng:2.35}
+];
+
+let markers = [];
+
+function showPlaces(list) {
+
+markers.forEach(marker => map.removeLayer(marker));
+markers = [];
+
+list.forEach(place => {
+
+const marker = L.marker([place.lat,place.lng])
+.addTo(map)
+.bindPopup(`<b>${place.name}</b><br>${place.type}`);
+
+markers.push(marker);
+
+});
+
+document.getElementById('status').textContent =
+list.length + ' sample locations shown.';
+
+}
+
+function filterPlaces(type,button) {
+
+document.querySelectorAll('.category')
+.forEach(b => b.classList.remove('active'));
+
+button.classList.add('active');
+
+const filtered = type === 'All'
+? places
+: places.filter(p => p.type === type);
+
+showPlaces(filtered);
+
+}
+
+function searchPlaces() {
+
+const query = document.getElementById('search')
+.value.toLowerCase().trim();
+
+const results = places.filter(p =>
+p.name.toLowerCase().includes(query) ||
+p.type.toLowerCase().includes(query)
+);
+
+showPlaces(results);
+
+if(results.length > 0) {
+map.setView([results[0].lat,results[0].lng],5);
+}
+
+}
+
+showPlaces(places);
+
+</script>
+
+</body>
+</html>
